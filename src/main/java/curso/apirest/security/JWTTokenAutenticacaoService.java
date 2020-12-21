@@ -58,6 +58,9 @@ public class JWTTokenAutenticacaoService {
 
 		/**
 		 * Liberando resposta para portas diferentes que usam API ou caso cliente WEB
+		 * Professor chegou a usar somente uma das opções 
+		 * "response.addHeader("Access-Control-Allow-Origin", "*")"
+		 * mas neste metodo tem mais opções
 		 */
 		liberacaoCord(response);
 
