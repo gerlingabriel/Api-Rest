@@ -98,8 +98,8 @@ public class JWTTokenAutenticacaoService {
 						 */
 						if (tokenLimpo.equals(usuario.getToken())) {
 
-							return new UsernamePasswordAuthenticationToken(usuario.getLogin(), usuario.getSenha(),
-									usuario.getAuthorities());
+							return new UsernamePasswordAuthenticationToken(usuario.getLogin(),
+							 usuario.getSenha(), usuario.getAuthorities());
 
 						}
 
