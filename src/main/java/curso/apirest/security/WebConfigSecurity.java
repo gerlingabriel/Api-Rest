@@ -56,5 +56,6 @@ public class WebConfigSecurity extends WebSecurityConfigurerAdapter {
 		
 		
 	}
+	
 
 }

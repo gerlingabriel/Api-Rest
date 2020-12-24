@@ -14,13 +14,15 @@ public class UsuarioDTO implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-    private String usuarioLogin;
-    private String usuarioNome;
+    private Long id;
+    private String login;
+    private String nome;
 
     public UsuarioDTO(Usuario usuario){
 
-        this.usuarioLogin = usuario.getLogin();
-        this.usuarioNome = usuario.getNome();
+        this.login = usuario.getLogin();
+        this.nome = usuario.getNome();
+        this.id = usuario.getId();
 
     }
 
