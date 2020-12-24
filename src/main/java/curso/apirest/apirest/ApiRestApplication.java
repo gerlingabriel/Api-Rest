@@ -32,22 +32,22 @@ public class ApiRestApplication implements WebMvcConfigurer{
 	}
 
 	@Override
-		public void addCorsMappings(CorsRegistry registry) {
+	public void addCorsMappings(CorsRegistry registry) {
 
-			registry.addMapping("/**").allowedMethods("*").allowedOrigins("*");
+		registry.addMapping("/**").allowedMethods("*").allowedOrigins("*");
 			
-			/*addMapping vai liberar os controles
-			 * addMapping("/**") - liberar o sistema todo
-			 * 
-			 * allowedMethods vai liberar os metodos, POST, GET, PUT
-			 * allowedMethods("POST", "DELETE") - libera somente esse dois metodos dentro
-			 * do controller acima
-			 * 
-			 * allowedOrigins("*") - controlle da onde vai vir os ajax autorizados
-			 * allowedOrigins("www.cliente20.com.br")
-			 * allowedOrigins("www.cliente20.com.br", "www.cliente40.com.br")
-			 * */
-		}
+		/* addMapping vai liberar os controles
+		 * addMapping("/**") - liberar o sistema todo
+		 * 
+		 * allowedMethods vai liberar os metodos, POST, GET, PUT
+		 * allowedMethods("POST", "DELETE") - libera somente esse dois metodos dentro
+		 * do controller acima
+		 * 
+		 * allowedOrigins("*") - controlle da onde vai vir os ajax autorizados
+		 * allowedOrigins("www.cliente20.com.br")
+		 * allowedOrigins("www.cliente20.com.br", "www.cliente40.com.br")
+		 * */
+	}
 
 		
 }
