@@ -27,7 +27,7 @@ import lombok.Setter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-public class Usuario implements UserDetails {
+public class Usuario implements UserDetails, Comparable<Usuario> {
 
 	/*
 	 * @Data - coloca todos settes, gettes, ToString, EquilsHash, tudo
@@ -222,6 +222,11 @@ public class Usuario implements UserDetails {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
+	}
+	
+	@Override
+	public int compareTo(Usuario o) {
+		return Long.compare(this.id, o.id);
 	}
 
 }

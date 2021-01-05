@@ -34,7 +34,7 @@ public class ApiRestApplication implements WebMvcConfigurer{
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
 
-		registry.addMapping("/**").allowedMethods("*").allowedOrigins("*");
+		registry.addMapping("/**").allowedMethods("POST", "GET", "PUT", "DELETE", "*").allowedOrigins("*").allowedHeaders("*").allowCredentials(false);
 			
 		/* addMapping vai liberar os controles
 		 * addMapping("/**") - liberar o sistema todo

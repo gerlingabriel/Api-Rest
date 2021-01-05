@@ -2,7 +2,7 @@ package curso.apirest.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.gson.Gson;
@@ -53,7 +54,7 @@ public class IndexController {
 
 	/* Serviço RESTful */
 	@GetMapping(value = "/", produces = "application/json")
-	@Cacheable(value = "cachelista")
+	@CachePut(value = "cachelista")
 	public ResponseEntity<List<UsuarioDTO>> lista() throws InterruptedException {
 
 		/* Simular um processo longe e demorado */
@@ -78,6 +79,7 @@ public class IndexController {
 		}
 
 		/**Consumindo API publica externa */
+		/** 
 		URL url = new URL("https://viacep.com.br/ws/"+usuario.getCep()+"/json/");
 		URLConnection urlConnection = url.openConnection();
 		InputStream is = urlConnection.getInputStream(); // verá os dados que requisições que acessei
@@ -96,7 +98,8 @@ public class IndexController {
 		usuario.setComplemento(auxUsuario.getComplemento());
 		usuario.setLocalidade(auxUsuario.getLocalidade());
 		usuario.setBairro(auxUsuario.getBairro());
-		usuario.setUf(auxUsuario.getUf());		
+		usuario.setUf(auxUsuario.getUf());	
+		*/	
 		/**Fim do consumo API do cep */
 
 
@@ -108,7 +111,7 @@ public class IndexController {
 		
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
 	}
-	
+
 	@PutMapping(value = "/", produces = "application/json")
 	public ResponseEntity<Usuario> update(@RequestBody Usuario usuario){	
 		
@@ -117,7 +120,7 @@ public class IndexController {
 		}
 		Usuario aux = usuarioRepository.findById(usuario.getId()).get();
 		
-		/*Caso a senha for diferente então terei que pegar a senha e criptografar*/
+		/*Caso a senha for diferente(editado) então terei que pegar a senha e criptografar*/
 		if(!usuario.getSenha().equals(aux.getSenha()) ) { // equal pois são Strings
 			usuario.setSenha(new BCryptPasswordEncoder().encode(usuario.getSenha()));			
 		}
@@ -134,7 +137,6 @@ public class IndexController {
 		return new ResponseEntity<Usuario>(HttpStatus.OK);
 	}
 	
-	
 	/*
 	 * @RequestMaping("/usuario")
 	 * 
@@ -144,5 +146,26 @@ public class IndexController {
 	 *  public ResponseEntity init() { return new ResponseEntity("Olá Rest String Boot",
 	 * HttpStatus.OK); }
 	 */
+
+	 /* Serviço RESTful */
+	@GetMapping(value = "/usuarioPorNome/{nome}", produces = "application/json")
+	public ResponseEntity<List<UsuarioDTO>> usuariosNomes(@PathVariable("nome") String nome) throws InterruptedException {
+
+		/* Simular um processo longe e demorado */
+		/* Thread.sleep(8000); */
+
+		List<Usuario> listaUsuario = usuarioRepository.findByUsuarioByNome(nome);
+
+
+		List<UsuarioDTO> listaUsuarioDTO = new ArrayList<UsuarioDTO>();
+
+		/**Usa-se esse loop para pegar dados da pesquisa e passa para Model de tratamento (mostra alguns atributos) */
+		for (Usuario usuario : listaUsuario) {
+			listaUsuarioDTO.add(new UsuarioDTO(usuario));
+		}
+		Collections.sort(listaUsuarioDTO);
+
+		return new ResponseEntity<List<UsuarioDTO>>(listaUsuarioDTO, HttpStatus.OK);
+	}
 
 }

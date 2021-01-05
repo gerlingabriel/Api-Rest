@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class UsuarioDTO implements Serializable {
+public class UsuarioDTO implements Serializable, Comparable<UsuarioDTO> {
 
     /**
      *
@@ -17,14 +17,21 @@ public class UsuarioDTO implements Serializable {
     private Long id;
     private String login;
     private String nome;
+    private String senha;
 
     public UsuarioDTO(Usuario usuario){
 
         this.login = usuario.getLogin();
         this.nome = usuario.getNome();
         this.id = usuario.getId();
+        this.senha = usuario.getSenha();
 
     }
+
+    @Override
+	public int compareTo(UsuarioDTO o) {
+		return Long.compare(this.id, o.id);
+	}
 
 
 }
