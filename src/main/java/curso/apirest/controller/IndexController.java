@@ -29,7 +29,9 @@ import com.google.gson.Gson;
 
 import curso.apirest.model.Usuario;
 import curso.apirest.model.UsuarioDTO;
+import curso.apirest.repository.TelefoneRepository;
 import curso.apirest.repository.UsuarioRepository;
+import curso.apirest.service.ImplementacaoUserDetailsService;
 
 @RestController /* Arquiterura REST */
 @RequestMapping("/usuario")
@@ -39,9 +41,15 @@ public class IndexController {
 	@Autowired /***** Se estivesse usando CDI teria que usar @Inject *****/
 	private UsuarioRepository usuarioRepository;
 
+	@Autowired
+	private ImplementacaoUserDetailsService implementacaoUserDetailsService;
+
+	@Autowired
+	private TelefoneRepository telefoneRepository;
+
 	/* Serviço RESTful */
 	@GetMapping(value = "/{id}", produces = "application/json")
-	public ResponseEntity<UsuarioDTO> init(@PathVariable(value = "id") Long id) {
+	public ResponseEntity<Usuario> init(@PathVariable(value = "id") Long id) {
 		/**
 		 * usa-se uma ourta classe para esconder os atributos e mostra somente o que
 		 * metodo "UsuarioDTO" quer mostrar
@@ -49,7 +57,7 @@ public class IndexController {
 
 		Usuario usu = usuarioRepository.findById(id).get();
 
-		return new ResponseEntity<UsuarioDTO>(new UsuarioDTO(usu), HttpStatus.OK);
+		return new ResponseEntity<Usuario>(usu, HttpStatus.OK);
 	}
 
 	/* Serviço RESTful */
@@ -67,105 +75,131 @@ public class IndexController {
 			listaUsuarioDTO.add(new UsuarioDTO(usuario));
 		}
 
+		Collections.sort(listaUsuarioDTO); /** Passar para Angular a lista ordenada por ID */
+
 		return new ResponseEntity<List<UsuarioDTO>>(listaUsuarioDTO, HttpStatus.OK);
 	}
 
 	@PostMapping("/")
 	@CacheEvict(value = "cachelista", allEntries = true)
 	public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario) throws Exception {
-		
-		for(int pos = 0; pos < usuario.getTelefones().size(); pos ++) {
-			usuario.getTelefones().get(pos).setUsuario(usuario);			
+
+		for (int pos = 0; pos < usuario.getTelefones().size(); pos++) {
+			usuario.getTelefones().get(pos).setUsuario(usuario);
 		}
 
-		/**Consumindo API publica externa */
-		/** 
-		URL url = new URL("https://viacep.com.br/ws/"+usuario.getCep()+"/json/");
-		URLConnection urlConnection = url.openConnection();
-		InputStream is = urlConnection.getInputStream(); // verá os dados que requisições que acessei
-		BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+		if (usuario.getCep() != null) {
 
-		String cep= "";
-		StringBuffer jsonCep =  new StringBuffer();
+			/** Consumindo API publica externa */
 
-		while((cep = br.readLine()) != null){
-			jsonCep.append(cep);
+			URL url = new URL("https://viacep.com.br/ws/" + usuario.getCep() + "/json/");
+			URLConnection urlConnection = url.openConnection();
+			InputStream is = urlConnection.getInputStream(); // verá os dados que requisições que acessei
+			BufferedReader br = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+
+			String cep = "";
+			StringBuffer jsonCep = new StringBuffer();
+
+			while ((cep = br.readLine()) != null) {
+				jsonCep.append(cep);
+			}
+
+			Usuario auxUsuario = new Gson().fromJson(jsonCep.toString(), Usuario.class);
+
+			usuario.setLogradouro(auxUsuario.getLogradouro());
+			usuario.setComplemento(auxUsuario.getComplemento());
+			usuario.setLocalidade(auxUsuario.getLocalidade());
+			usuario.setBairro(auxUsuario.getBairro());
+			usuario.setUf(auxUsuario.getUf());
+
+				/** Fim do consumo API do cep */
+
 		}
+	
 
-		Usuario auxUsuario = new Gson().fromJson(jsonCep.toString(), Usuario.class);
-
-		usuario.setLogradouro(auxUsuario.getLogradouro());
-		usuario.setComplemento(auxUsuario.getComplemento());
-		usuario.setLocalidade(auxUsuario.getLocalidade());
-		usuario.setBairro(auxUsuario.getBairro());
-		usuario.setUf(auxUsuario.getUf());	
-		*/	
-		/**Fim do consumo API do cep */
-
-
-		/**Criptografar a senha para segurnaça do sistema */
+		/** Criptografar a senha para segurnaça do sistema */
 		usuario.setSenha(new BCryptPasswordEncoder().encode(usuario.getSenha()));
 
-		/**Fica salva no banco de dados a senha criptografado */
+		/** Fica salva no banco de dados a senha criptografado */
 		Usuario usuarioSalvo = usuarioRepository.save(usuario);
-		
+
+		implementacaoUserDetailsService.inserirRoles(usuario.getId());
+
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
 	}
 
 	@PutMapping(value = "/", produces = "application/json")
-	public ResponseEntity<Usuario> update(@RequestBody Usuario usuario){	
-		
-		for(int pos = 0; pos < usuario.getTelefones().size(); pos ++) {
-			usuario.getTelefones().get(pos).setUsuario(usuario);			
+	public ResponseEntity<Usuario> update(@RequestBody Usuario usuario) {
+
+		for (int pos = 0; pos < usuario.getTelefones().size(); pos++) {
+			usuario.getTelefones().get(pos).setUsuario(usuario);
 		}
 		Usuario aux = usuarioRepository.findById(usuario.getId()).get();
-		
-		/*Caso a senha for diferente(editado) então terei que pegar a senha e criptografar*/
-		if(!usuario.getSenha().equals(aux.getSenha()) ) { // equal pois são Strings
-			usuario.setSenha(new BCryptPasswordEncoder().encode(usuario.getSenha()));			
+
+		/*
+		 * Caso a senha for diferente(editado) então terei que pegar a senha e
+		 * criptografar
+		 */
+		if (!usuario.getSenha().equals(aux.getSenha())) { // equal pois são Strings
+			usuario.setSenha(new BCryptPasswordEncoder().encode(usuario.getSenha()));
 		}
+
 		Usuario novoUsuario = usuarioRepository.save(usuario);
-		
+
 		return new ResponseEntity<Usuario>(novoUsuario, HttpStatus.OK);
 	}
-	
+
 	@DeleteMapping(value = "/{id}", produces = "application/json")
-	public ResponseEntity<Usuario> deletar(@PathVariable(value = "id") Long id){		
-		
+	public ResponseEntity<Usuario> deletar(@PathVariable(value = "id") Long id) {
+
+		implementacaoUserDetailsService.deletarRoles(id);
+
 		usuarioRepository.deleteById(id);
-		
+
 		return new ResponseEntity<Usuario>(HttpStatus.OK);
 	}
-	
+
 	/*
 	 * @RequestMaping("/usuario")
 	 * 
-	 * //ABriria outra pagina utilizando get co controle acima "usuario"
+	 * //ABriria outra pagina utilizando get com controle acima "usuario"
 	 * 
-	 * @GetMapping(value = "/{codico}", produces = "application/json")
-	 *  public ResponseEntity init() { return new ResponseEntity("Olá Rest String Boot",
+	 * @GetMapping(value = "/{codico}", produces = "application/json") public
+	 * ResponseEntity init() { return new ResponseEntity("Olá Rest String Boot",
 	 * HttpStatus.OK); }
 	 */
 
-	 /* Serviço RESTful */
+	/* Serviço RESTful */
 	@GetMapping(value = "/usuarioPorNome/{nome}", produces = "application/json")
-	public ResponseEntity<List<UsuarioDTO>> usuariosNomes(@PathVariable("nome") String nome) throws InterruptedException {
+	public ResponseEntity<List<UsuarioDTO>> usuariosNomes(@PathVariable("nome") String nome)
+			throws InterruptedException {
 
 		/* Simular um processo longe e demorado */
 		/* Thread.sleep(8000); */
 
 		List<Usuario> listaUsuario = usuarioRepository.findByUsuarioByNome(nome);
 
-
 		List<UsuarioDTO> listaUsuarioDTO = new ArrayList<UsuarioDTO>();
 
-		/**Usa-se esse loop para pegar dados da pesquisa e passa para Model de tratamento (mostra alguns atributos) */
+		/**
+		 * Usa-se esse loop para pegar dados da pesquisa e passa para Model de
+		 * tratamento (mostra alguns atributos)
+		 */
 		for (Usuario usuario : listaUsuario) {
 			listaUsuarioDTO.add(new UsuarioDTO(usuario));
 		}
 		Collections.sort(listaUsuarioDTO);
 
 		return new ResponseEntity<List<UsuarioDTO>>(listaUsuarioDTO, HttpStatus.OK);
+	}
+
+	@DeleteMapping(value = "/removerTelefone/{id}", produces = "application/text")
+	public String deletarTelefone(@PathVariable(value = "id") Long id){
+
+		telefoneRepository.deleteById(id);
+
+		return "ok";
+
 	}
 
 }

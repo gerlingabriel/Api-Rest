@@ -31,10 +31,11 @@ public class Telefones implements Serializable{
 	@Column(length = 11)
 	private String numeroTelefone;
 	
-	@ManyToOne @JsonIgnore
+	@ManyToOne @JsonIgnore /**Iesse Ignore Json serve para não ficar loop com usuario */
 	@JoinColumn(foreignKey = @ForeignKey(name = "usuario_id"))
 	private Usuario usuario;
 
+	//Métodos
 	public Long getId() {
 		return id;
 	}

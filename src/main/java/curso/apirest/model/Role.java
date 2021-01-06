@@ -22,6 +22,7 @@ public class Role implements GrantedAuthority{
 	@Column(length = 50)
 	private String cargo;
 
+	//Metodos
 	@Override
 	public String getAuthority() { /*retorna qual tipo de atorização*/
 		return this.cargo;

@@ -6,17 +6,14 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.ForeignKey;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
-import javax.persistence.UniqueConstraint;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -101,9 +98,13 @@ public class Usuario implements UserDetails, Comparable<Usuario> {
 	@OneToMany(mappedBy = "usuario", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Telefones> telefones = new ArrayList<Telefones>();
 
-	@OneToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "usuario_role", uniqueConstraints = @UniqueConstraint(columnNames = { "usuario_id",
-			"role_id" }, name = "user_role"), joinColumns = @JoinColumn(name = "usuario_id", referencedColumnName = "id", table = "usuario", unique = false, foreignKey = @ForeignKey(name = "usuario_fk", value = ConstraintMode.CONSTRAINT)), inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id", table = "role", unique = false, updatable = false, foreignKey = @ForeignKey(name = "role_fk", value = ConstraintMode.CONSTRAINT)))
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
+	@JoinTable(name = "usuarios_role",
+		joinColumns = {@JoinColumn(name = "usuario_id", referencedColumnName = "id", table = "usuario", unique = false)}, 
+		/**Criação da primeira chave */
+		
+		inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id", table = "role", unique = false)}
+		)  
 	private List<Role> roles = new ArrayList<Role>();
 
 	/*

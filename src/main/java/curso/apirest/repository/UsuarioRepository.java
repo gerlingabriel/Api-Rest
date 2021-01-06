@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import curso.apirest.model.Usuario;
 
+
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
 	
@@ -23,6 +24,14 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long>{
 
 	@Query("select u from  Usuario u where u.nome like %?1%")
 	List<Usuario> findByUsuarioByNome(String nome);
+
+	@Query(value = "select constraint_name from information_schema.constraint_column_usage where table_name = 'usuarios_role' and column_name = 'role_id';", nativeQuery = true)
+	String consultaConstraintRole();
+
+	@Transactional
+	@Modifying
+	@Query(nativeQuery = true, value = "INSERT INTO usuarios_role (usuario_id, role_id) VALUES (?1, (SELECT id FROM role where cargo = 'ROLE_USER'));")
+	void acessoPadrao(Long id);
 
 
 }
