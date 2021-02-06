@@ -3,6 +3,9 @@ package curso.apirest.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,14 +24,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import com.google.gson.Gson;
 
 import curso.apirest.model.Usuario;
-import curso.apirest.model.UsuarioDTO;
 import curso.apirest.repository.TelefoneRepository;
 import curso.apirest.repository.UsuarioRepository;
 import curso.apirest.service.ImplementacaoUserDetailsService;
@@ -63,21 +62,34 @@ public class IndexController {
 	/* Serviço RESTful */
 	@GetMapping(value = "/", produces = "application/json")
 	@CachePut(value = "cachelista")
-	public ResponseEntity<List<UsuarioDTO>> lista() throws InterruptedException {
+	public ResponseEntity<Page<Usuario>> lista() throws InterruptedException {
 
 		/* Simular um processo longe e demorado */
 		/* Thread.sleep(8000); */
 
-		List<Usuario> listaUsuario = usuarioRepository.findAll();
-		List<UsuarioDTO> listaUsuarioDTO = new ArrayList<UsuarioDTO>();
+		/**Rotina para paginação de acordo com Angular */
+		PageRequest page = PageRequest.of(0, 5, Sort.by("id"));
+		Page<Usuario> list = usuarioRepository.findAll(page);
 
-		for (Usuario usuario : listaUsuario) {
-			listaUsuarioDTO.add(new UsuarioDTO(usuario));
-		}
+		//Collections.sort(list); /** Passar para Angular a lista ordenada por ID */
 
-		Collections.sort(listaUsuarioDTO); /** Passar para Angular a lista ordenada por ID */
+		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
+	}
 
-		return new ResponseEntity<List<UsuarioDTO>>(listaUsuarioDTO, HttpStatus.OK);
+	@GetMapping(value = "/page/{pagina}", produces = "application/json")
+	@CachePut(value = "cachelista")
+	public ResponseEntity<Page<Usuario>> listaPAginacao(@PathVariable(value = "pagina") int pagina) throws InterruptedException {
+
+		/* Simular um processo longe e demorado */
+		/* Thread.sleep(8000); */
+
+		/**Rotina para paginação de acordo com Angular */
+		PageRequest page = PageRequest.of(pagina, 5, Sort.by("id"));
+		Page<Usuario> list = usuarioRepository.findAll(page);
+
+		//Collections.sort(list); /** Passar para Angular a lista ordenada por ID */
+
+		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
 	}
 
 	@PostMapping("/")
@@ -169,30 +181,53 @@ public class IndexController {
 	 * HttpStatus.OK); }
 	 */
 
-	/* Serviço RESTful */
+	/*END-POINT consulta de usuário por nome*/
 	@GetMapping(value = "/usuarioPorNome/{nome}", produces = "application/json")
-	public ResponseEntity<List<UsuarioDTO>> usuariosNomes(@PathVariable("nome") String nome)
-			throws InterruptedException {
+	@CachePut("cacheusuarios")
+	public ResponseEntity<Page<Usuario>> usuarioPorNome (@PathVariable("nome") String nome) throws InterruptedException{
+		
+		
+		PageRequest pageRequest = null;
+		Page<Usuario> list = null;
+		
+		if (nome == null || (nome != null && nome.trim().isEmpty())
+				|| nome.equalsIgnoreCase("undefined")) {/*Não informou nome*/
+			
+			pageRequest = PageRequest.of(0, 5, Sort.by("id"));
+			list =  usuarioRepository.findAll(pageRequest);
+		}else {
+			pageRequest = PageRequest.of(0, 5, Sort.by("id"));
+			list = usuarioRepository.findUserByNamePage(nome, pageRequest);
+		}		
+	
+		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
 
-		/* Simular um processo longe e demorado */
-		/* Thread.sleep(8000); */
-
-		List<Usuario> listaUsuario = usuarioRepository.findByUsuarioByNome(nome);
-
-		List<UsuarioDTO> listaUsuarioDTO = new ArrayList<UsuarioDTO>();
-
-		/**
-		 * Usa-se esse loop para pegar dados da pesquisa e passa para Model de
-		 * tratamento (mostra alguns atributos)
-		 */
-		for (Usuario usuario : listaUsuario) {
-			listaUsuarioDTO.add(new UsuarioDTO(usuario));
+	}
+	
+	
+	
+	/*END-POINT consulta de usuário por nome*/
+	@GetMapping(value = "/usuarioPorNome/{nome}/page/{page}", produces = "application/json")
+	@CachePut("cacheusuarios")
+	public ResponseEntity<Page<Usuario>> usuarioPorNomePage (@PathVariable("nome") String nome, @PathVariable("page") int page) throws InterruptedException{
+		
+		PageRequest pageRequest = null;
+		Page<Usuario> list = null;
+		
+		if (nome == null || (nome != null && nome.trim().isEmpty())
+				|| nome.equalsIgnoreCase("undefined")) {/*Não informou nome*/
+			
+			pageRequest = PageRequest.of(page, 5, Sort.by("id"));
+			list =  usuarioRepository.findAll(pageRequest);
+		}else {
+			pageRequest = PageRequest.of(page, 5, Sort.by("id"));
+			list = usuarioRepository.findUserByNamePage(nome, pageRequest);
 		}
-		Collections.sort(listaUsuarioDTO);
-
-		return new ResponseEntity<List<UsuarioDTO>>(listaUsuarioDTO, HttpStatus.OK);
+		
+		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
 	}
 
+	/**Métodod para deletar */
 	@DeleteMapping(value = "/removerTelefone/{id}", produces = "application/text")
 	public String deletarTelefone(@PathVariable(value = "id") Long id){
 
