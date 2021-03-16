@@ -8,10 +8,7 @@ import javax.persistence.Id;
 
 import org.springframework.security.core.GrantedAuthority;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Entity @Setter @Getter
+@Entity
 public class Role implements GrantedAuthority{
 
 	private static final long serialVersionUID = 1L;
@@ -53,6 +50,20 @@ public class Role implements GrantedAuthority{
 		return true;
 	}
 	
+	public String getCargo() {
+		return cargo;
+	}
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public void setCargo(String cargo) {
+		this.cargo = cargo;
+	}
 	
 
 }

@@ -18,9 +18,6 @@ import javax.persistence.OneToMany;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
@@ -58,40 +55,26 @@ public class Usuario implements UserDetails, Comparable<Usuario> {
 
 	private String senha;
 
-	@Setter
-	@Getter
 	private String token = "";
 
 	@Column(length = 50)
 	private String nome;
 
-	@Setter
-	@Getter
 	@Column(length = 9)
 	private String cep;
 
-	@Setter
-	@Getter
 	@Column(length = 60)
 	private String logradouro;
 
-	@Setter
-	@Getter
 	@Column(length = 30)
 	private String complemento;
 
-	@Setter
-	@Getter
 	@Column(length = 50)
 	private String bairro;
 
-	@Setter
-	@Getter
 	@Column(length = 50)
 	private String localidade;
 
-	@Setter
-	@Getter
 	@Column(length = 2)
 	private String uf;
 
@@ -99,12 +82,12 @@ public class Usuario implements UserDetails, Comparable<Usuario> {
 	private List<Telefones> telefones = new ArrayList<Telefones>();
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
-	@JoinTable(name = "usuarios_role",
-		joinColumns = {@JoinColumn(name = "usuario_id", referencedColumnName = "id", table = "usuario", unique = false)}, 
-		/**Criação da primeira chave */
-		
-		inverseJoinColumns = {@JoinColumn(name = "role_id", referencedColumnName = "id", table = "role", unique = false)}
-		)  
+	@JoinTable(name = "usuarios_role", joinColumns = {
+			@JoinColumn(name = "usuario_id", referencedColumnName = "id", table = "usuario", unique = false) },
+			/** Criação da primeira chave */
+
+			inverseJoinColumns = {
+					@JoinColumn(name = "role_id", referencedColumnName = "id", table = "role", unique = false) })
 	private List<Role> roles = new ArrayList<Role>();
 
 	/*
@@ -224,10 +207,66 @@ public class Usuario implements UserDetails, Comparable<Usuario> {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public int compareTo(Usuario o) {
 		return Long.compare(this.id, o.id);
+	}
+
+	public String getCep() {
+		return cep;
+	}
+
+	public String getBairro() {
+		return bairro;
+	}
+
+	public String getComplemento() {
+		return complemento;
+	}
+
+	public String getLocalidade() {
+		return localidade;
+	}
+
+	public String getLogradouro() {
+		return logradouro;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public String getUf() {
+		return uf;
+	}
+
+	public void setBairro(String bairro) {
+		this.bairro = bairro;
+	}
+
+	public void setCep(String cep) {
+		this.cep = cep;
+	}
+
+	public void setComplemento(String complemento) {
+		this.complemento = complemento;
+	}
+
+	public void setLocalidade(String localidade) {
+		this.localidade = localidade;
+	}
+
+	public void setLogradouro(String logradouro) {
+		this.logradouro = logradouro;
+	}
+
+	public void setUf(String uf) {
+		this.uf = uf;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
 	}
 
 }

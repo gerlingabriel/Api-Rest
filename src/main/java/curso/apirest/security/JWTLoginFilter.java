@@ -22,11 +22,12 @@ import curso.apirest.model.Usuario;
 public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 
 	/* Configurando o gerenciador de autenticação */
+	/** Método contrutor */
 	protected JWTLoginFilter(String url, AuthenticationManager authenticationManager) {
 		/* Obriga autenticar */
 		super(new AntPathRequestMatcher(url));
 
-		/* Gerenciando a altenticação */
+		/* Gerenciando a autenticação */
 		setAuthenticationManager(authenticationManager);
 	}
 
@@ -36,6 +37,7 @@ public class JWTLoginFilter extends AbstractAuthenticationProcessingFilter {
 			throws AuthenticationException, IOException, ServletException {
 
 		/* Esta pegando o token para validar */
+		/** Aqui que vem os dados JSON do Usuario digitado no LOGIN */
 		Usuario usu = new ObjectMapper().readValue(request.getInputStream(), Usuario.class);
 
 		/* Retorna o usuario login, senha e acesso */

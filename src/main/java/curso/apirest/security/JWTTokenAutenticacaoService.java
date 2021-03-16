@@ -82,25 +82,21 @@ public class JWTTokenAutenticacaoService {
 				String tokenLimpo = token.replace(TOKEN_PREFIX, "").trim();
 
 				/* Faz a validação do token do usuário */
-				String user = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(tokenLimpo)
-				.getBody().getSubject();
+				String user = Jwts.parser().setSigningKey(SECRET).parseClaimsJws(tokenLimpo).getBody().getSubject();
 
 				if (user != null) {
 
-					Usuario usuario = ApplicationContextLoad.getApplicationContext()
-					.getBean(UsuarioRepository.class).findByUsuarioByLogin(user);
+					Usuario usuario = ApplicationContextLoad.getApplicationContext().getBean(UsuarioRepository.class).findByUsuarioByLogin(user);
 
 					/* Retornar o usuario */
 					if (usuario != null) {
-
 						/**
 						 * Dubla validação para verificar se realmente token que está sendo usado é do
 						 * usuário
 						 */
 						if (tokenLimpo.equals(usuario.getToken())) {
 
-							return new UsernamePasswordAuthenticationToken(usuario.getLogin(),
-							 usuario.getSenha(), usuario.getAuthorities());
+							return new UsernamePasswordAuthenticationToken(usuario.getLogin(), usuario.getSenha(), usuario.getAuthorities());
 
 						}
 
@@ -108,6 +104,7 @@ public class JWTTokenAutenticacaoService {
 
 				}
 			} // fim da veriicação de token está null ou não
+			
 
 		} catch (io.jsonwebtoken.ExpiredJwtException e) {
 			try {

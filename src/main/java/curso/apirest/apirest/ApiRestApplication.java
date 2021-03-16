@@ -28,7 +28,7 @@ public class ApiRestApplication implements WebMvcConfigurer{
 	public static void main(String[] args) {
 		SpringApplication.run(ApiRestApplication.class, args);
 
-		/*System.out.println(new BCryptPasswordEncoder().encode("123")); para testar a crip*/
+		//System.out.println(new BCryptPasswordEncoder().encode("123")); //para testar a crip*/
 	}
 
 	@Override

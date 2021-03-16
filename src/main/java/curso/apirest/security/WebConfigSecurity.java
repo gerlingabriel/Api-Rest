@@ -32,6 +32,7 @@ public class WebConfigSecurity extends WebSecurityConfigurerAdapter {
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
 		/* Service que irá consultar o usuário no banco de dados */
+		/* passwordEncoder é a criptação da senha */
 		auth.userDetailsService(detailsService).passwordEncoder(new BCryptPasswordEncoder());
 
 	}

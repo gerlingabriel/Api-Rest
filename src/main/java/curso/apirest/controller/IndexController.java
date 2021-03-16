@@ -96,9 +96,9 @@ public class IndexController {
 	@CacheEvict(value = "cachelista", allEntries = true)
 	public ResponseEntity<Usuario> cadastrar(@RequestBody Usuario usuario) throws Exception {
 
-		for (int pos = 0; pos < usuario.getTelefones().size(); pos++) {
+		/*for (int pos = 0; pos < usuario.getTelefones().size(); pos++) {
 			usuario.getTelefones().get(pos).setUsuario(usuario);
-		}
+		}*/
 
 		if (usuario.getCep() != null) {
 
@@ -135,7 +135,7 @@ public class IndexController {
 		/** Fica salva no banco de dados a senha criptografado */
 		Usuario usuarioSalvo = usuarioRepository.save(usuario);
 
-		implementacaoUserDetailsService.inserirRoles(usuario.getId());
+		//implementacaoUserDetailsService.inserirRoles(usuario.getId());
 
 		return new ResponseEntity<Usuario>(usuarioSalvo, HttpStatus.OK);
 	}
@@ -197,7 +197,7 @@ public class IndexController {
 			list =  usuarioRepository.findAll(pageRequest);
 		}else {
 			pageRequest = PageRequest.of(0, 5, Sort.by("id"));
-			list = usuarioRepository.findUserByNamePage(nome, pageRequest);
+			list = usuarioRepository.findByNomeContainsIgnoreCase(nome, pageRequest);
 		}		
 	
 		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
@@ -221,7 +221,7 @@ public class IndexController {
 			list =  usuarioRepository.findAll(pageRequest);
 		}else {
 			pageRequest = PageRequest.of(page, 5, Sort.by("id"));
-			list = usuarioRepository.findUserByNamePage(nome, pageRequest);
+			list = usuarioRepository.findByNomeContainsIgnoreCase(nome, pageRequest);
 		}
 		
 		return new ResponseEntity<Page<Usuario>>(list, HttpStatus.OK);
@@ -238,3 +238,4 @@ public class IndexController {
 	}
 
 }
+	
